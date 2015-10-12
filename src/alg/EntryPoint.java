@@ -131,6 +131,8 @@ public class EntryPoint
 		lHarnass.planBestresponse(10, 25);
 		double lBestRespEval = lEvaluator.evaluate(lHarnass, lPenalty, lTemprture, "bestresponse");
 
+		//here our arbiter
+		
 		lPenalty.close();
 		lTemprture.close();
 
