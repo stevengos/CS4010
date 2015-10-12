@@ -81,12 +81,12 @@ public class EntryPoint
 
 	public static void runMultiLevelExperiment(LocalDate pDate, String pDirectory) throws IOException
 	{
-		int               lAgents   = 20;
-		int               lSetpoint = 70;
-		PlanQuality       lQuality  = PlanQuality.Low;
+		int               lAgents   = 20;	//Number of houses
+		int               lSetpoint = 70;	//??
+		PlanQuality       lQuality  = PlanQuality.Low;	//Precision of calculation
 		DateTimeFormatter lFormat   = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		ClimateRegion     pRegion   = ClimateRegion.NETHERLANDS;
-		HouseIntegrityLevel pInsulation = HouseIntegrityLevel.GOOD;
+		ClimateRegion     pRegion   = ClimateRegion.NETHERLANDS;		//Model parameter
+		HouseIntegrityLevel pInsulation = HouseIntegrityLevel.GOOD;		//House parameter
 
 		String lRunDirectory = pDirectory + "runs/";
 		File lRoot = new File(lRunDirectory);

@@ -39,8 +39,20 @@ public class MultiLevelEvaluator extends GLEvaluator
 				lHouseID++;
 			}
 
-			if (lLocalUse > lLocalLimit)
+			if (lLocalUse > lLocalLimit) {
+				
+				
+				////
+				
+				//
+				///
+				//
+				//
+				//
 				System.err.println("Violated secondary load constraint by " + (lLocalUse-lLocalLimit));
+				//HIER KOMT ONZE ARBITER>>
+			}
+				
 		}
 	}
 
