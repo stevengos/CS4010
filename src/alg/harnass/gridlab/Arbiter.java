@@ -37,7 +37,7 @@ public class Arbiter
 	 */
 	public static Random RAND_GEN = new Random();
 
-	private static void deterministicArbitrage(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
+	protected static void deterministicArbitrage(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
 	{
 		Agent	lChanger   = null;
 		int		lNewAction = -1;
@@ -87,7 +87,7 @@ public class Arbiter
 		pArbitratedChoice.set(lChanger.getID(), lNewAction);
 	}
 
-	private static void logitArbitrage(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
+	protected static void logitArbitrage(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
 	{
 		/*
 		 * 		Find, for each agent, its best unconstrained alternative.
@@ -180,7 +180,7 @@ public class Arbiter
 			throw new IllegalStateException("Failed to arbitrate in " + lAgentProb);
 	}
 
-	private static void randomArbiter(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
+	protected static void randomArbiter(Map<? extends Agent, List<ActionReward>> pPreferences, int[] pActionLimits, int[] pActionCounts, List<Integer> pArbitratedChoice)
 	{
 		Map<Agent, Integer> lOveruserAlt = new HashMap<Agent, Integer>();
 
