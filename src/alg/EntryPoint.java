@@ -133,6 +133,9 @@ public class EntryPoint
 
 		//here our arbiter
 		
+		
+		//something with plan and evaluate
+		
 		lPenalty.close();
 		lTemprture.close();
 

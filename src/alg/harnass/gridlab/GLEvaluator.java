@@ -11,11 +11,11 @@ import alg.util.Celsius;
 public class GLEvaluator
 {
 	protected final GridLabEvaluator fEvaluator;
-	private final double        fSetpoint;
+	protected final double        fSetpoint;
 	private final double		fLoadLimitkW;
 
 	//private final LocalDateTime fStartTime;
-	private final int           fDurationS;
+	protected final int           fDurationS;
 	//private final int           fSampleStepS;
 
 	public GLEvaluator(IGridLabWorld pSimulator, double pSetpoint, double pLoadLimit, LocalDateTime pStartTime, int pDurationS, int pStepsizeS)
@@ -36,7 +36,7 @@ public class GLEvaluator
 	 *	@param pModel The house model to compute the penalty for.
 	 *	@return House discomfort penalty for the current time-step.
 	 */
-	private double computeHousePenalty(GridLabHouseModel pModel)
+	protected double computeHousePenalty(GridLabHouseModel pModel)
 	{
 		double lPenalty = 0;
 
