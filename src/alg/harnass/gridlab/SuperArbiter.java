@@ -25,7 +25,7 @@ public class SuperArbiter {
 	
 	public static int[] arbitrage(int availablePower, double[] pGroupPenalty, int[] pGroupDesiredPower)
 	{
-		int[]	returnedPower = null;
+		int[]	returnedPower = new int[pGroupDesiredPower.length];
 		int		remainingPower = availablePower;
 		
 		int lTotalDesiredPower = 0;
@@ -54,11 +54,61 @@ public class SuperArbiter {
 					
 					remainingPower = remainingPower - pGroupDesiredPower[i];
 				}
+				break;
+			}
+			case(2):{				
+				//find total desired power
+				int totalDesired = 0;
+				for(int i = 0; i < pGroupDesiredPower.length; i++){
+					totalDesired += pGroupDesiredPower[i];
+				}
+				
+				double powerPercentage = ((double)availablePower)/((double) totalDesired);
+				
+				//divide power amongst neighbourhood
+				for(int i = 0; i < pGroupDesiredPower.length; i++){
+					int desired = (int)Math.floor(pGroupDesiredPower[i]*powerPercentage);
+					
+					if(remainingPower > 0){
+						if(remainingPower - desired < 0){
+							returnedPower[i] = remainingPower;
+						}
+						else{
+							returnedPower[i] = desired;
+						}
+					}
+					else{
+						returnedPower[i] = 0;
+					}
+					
+					remainingPower = remainingPower - desired;
+				}
+				
+				//divide remaining power amongst neighbourhood
+				for(int i = 0; i < pGroupDesiredPower.length; i++){
+					int desired = (int)Math.floor(pGroupDesiredPower[i]*(1 - powerPercentage));
+					
+					if(remainingPower > 0){
+						if(remainingPower - desired < 0){
+							returnedPower[i] = remainingPower;
+						}
+						else{
+							returnedPower[i] = desired;
+						}
+					}
+					else{
+						returnedPower[i] = 0;
+					}
+					
+					remainingPower = remainingPower - desired;
+				}
+				break;
 			}
 			default:{
 				for(int i = 0; i < pGroupDesiredPower.length; i++){
 					returnedPower[i] = pGroupDesiredPower[i];
 				}
+				break;
 			}
 		}
 		
