@@ -45,7 +45,7 @@ public class EntryPoint
 		int     lStartSecond = pDate.getDayOfYear() * (24*60*60) + 12*60*60;			// Start midday.
 		int     lDuration    = 24*60*60;
 		int     lStepsize    = lQuality.getStepSize();
-		double  lLimitkW     = 3.25*lAgents;
+		double  lLimitkW     = 3.25*lAgents; //Wat doet deze waarde?
 
 		PrintStream lPenalty   = new PrintStream(lRunDirectory+"p_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");
 		PrintStream lTemprture = new PrintStream(lRunDirectory+"t_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");
@@ -105,7 +105,7 @@ public class EntryPoint
 		int     	lStepsize    = lQuality.getStepSize();
 		double  	lLimitkW     = 2.75*lAgents;
 		int[]		lHouseGroups = new int[] {10, 10};
-		double[]	lGroupMaxLoad = new double[] {35, 35};
+		double[]	lGroupMaxLoad = new double[] {35, 35}; //Wat doet deze waarde? Alleen gebruikt voor lokaal berekenen van de huis policy?
 
 		PrintStream lPenalty   = new PrintStream(lRunDirectory+"p_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");
 		PrintStream lTemprture = new PrintStream(lRunDirectory+"t_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");

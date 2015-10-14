@@ -8,7 +8,11 @@ import alg.sim.domain.Action;
 import alg.sim.domain.Agent;
 import alg.sim.domain.ArbiMDP;
 import alg.sim.solver.data.ActionReward;
-
+/**
+ * Extensie van Arbiter.java. Deze is omgebouwd zodat deze werkt met het GLMutliLevelPlanningHarnass
+ * @author Christian
+ *
+ */
 public class MultiLevelArbiter extends Arbiter {
 	public static List<Integer> arbitrage(ArbiMDP pMDP, 
 			int     pTime, int pLimit,
