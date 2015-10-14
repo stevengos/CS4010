@@ -148,7 +148,7 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 		//TODO: OUR ARBITER
 		int lTotalLimit = fInstance.getOnLimits().get(pTime);
 		int[] lGroupLimit = new int[fHouseGroups.length];
-		for(int i = 0; i < lGroupLimit.length; i++) {
+		for(int i = 0; i < lGroupLimit.length; i++){
 			lGroupLimit[i] = lTotalLimit/lGroupLimit.length+1;
 		}
 		//fInstance.getAgents()
