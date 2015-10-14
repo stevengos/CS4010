@@ -352,7 +352,7 @@ public class GLPlanningHarnass implements IJointPolicy
 		if ((pTime+1) < this.fInstance.getHorizon()) this.advancePolicies();
 	}
 
-	private void applySelectedActions(IGridLabControllable pWorld, Map<AdvancedGridLabAgent, List<ActionReward>> pPreferences, List<Integer> pAssignment)
+	protected void applySelectedActions(IGridLabControllable pWorld, Map<AdvancedGridLabAgent, List<ActionReward>> pPreferences, List<Integer> pAssignment)
 	{
 		for (int i = 0; i < pWorld.getSize(); i++)
 		{

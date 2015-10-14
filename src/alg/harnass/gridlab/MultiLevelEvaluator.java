@@ -28,20 +28,21 @@ public class MultiLevelEvaluator extends GLEvaluator
 		int lHouseID = 0;
 		for (int i = 0; i < this.fHouseGroups.length; i++)
 		{
-			int    lHouses     = this.fHouseGroups[i];
-			double lLocalLimit = this.fGroupMaxLoad[i];
+			int    lHouses     = this.fHouseGroups[i];	//Number of houses in neighbourhood i
+			double lLocalLimit = this.fGroupMaxLoad[i];	//Limit of neighboorhood i
 			double lLocalUse   = lHouses * super.fEvaluator.getBackgroundLoad() / super.fEvaluator.getSize();
 
+			
+			//Test whether we made valid choices
 			for (int j = 0; j < lHouses; j++)
 			{
 				GridLabHouseModel lHouse = super.fEvaluator.getHouse(lHouseID);
 				lLocalUse = lLocalUse + lHouse.getCurrentLoad();
 				lHouseID++;
 			}
-
-			if (lLocalUse > lLocalLimit) {
+			
+			if (lLocalUse > lLocalLimit)
 				System.err.println("Violated secondary load constraint by " + (lLocalUse-lLocalLimit));
-			}
 				
 		}
 	}

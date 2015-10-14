@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import alg.gridlabd.builder.models.glm.ClimateRegion;
 import alg.gridlabd.builder.models.glm.HouseIntegrityLevel;
 import alg.harnass.gridlab.GLEvaluator;
+import alg.harnass.gridlab.GLMultiLevelPlanningHarnass;
 import alg.harnass.gridlab.GLPlanningHarnass;
 import alg.harnass.gridlab.GLThermostatPolicy;
 import alg.harnass.gridlab.IJointPolicy;
@@ -99,22 +100,23 @@ public class EntryPoint
 		MultiLevelSim lSimulator = new MultiLevelSim("./instances/gridlab/"+pRegion+".txt", lAgents, pInsulation, lSetpoint, 3985l, lWindRequired);
 
 		// Set the limit to start from day 0.
-		int     lStartSecond = pDate.getDayOfYear() * (24*60*60) + 12*60*60;			// Start midday.
-		int     lDuration    = 24*60*60;
-		int     lStepsize    = lQuality.getStepSize();
-		double  lLimitkW     = 2.75*lAgents;
+		int     	lStartSecond = pDate.getDayOfYear() * (24*60*60) + 12*60*60;			// Start midday.
+		int     	lDuration    = 24*60*60;
+		int     	lStepsize    = lQuality.getStepSize();
+		double  	lLimitkW     = 2.75*lAgents;
+		int[]		lHouseGroups = new int[] {10, 10};
+		double[]	lGroupMaxLoad = new double[] {35, 35};
 
 		PrintStream lPenalty   = new PrintStream(lRunDirectory+"p_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");
 		PrintStream lTemprture = new PrintStream(lRunDirectory+"t_"+pInsulation+"_"+pDate.getDayOfYear()+".txt");
 
 		lSimulator.setSimProperties(lStartSecond, lDuration, lStepsize, lLimitkW);
 		MultiLevelEvaluator lEvaluator = new MultiLevelEvaluator(lSimulator, lSetpoint, lLimitkW, LocalDateTime.of(pDate, LocalTime.of(12, 0)), lDuration, lStepsize);
-		lEvaluator.setLocalLimits(new int[]    { 10,  10},
-								  new double[] { 35,  35} );
+		lEvaluator.setLocalLimits(lHouseGroups, lGroupMaxLoad);
 
 		// Prepare the transition tables of the planner.
 		GLPlanningHarnass lHarnass = null;
-		lHarnass     = new GLPlanningHarnass(lSimulator, lQuality, lSetpoint);
+		lHarnass     = new GLMultiLevelPlanningHarnass(lHouseGroups, lSimulator, lQuality, lSetpoint);
 
 		// The thermostats' policy.
 		lSimulator.reset();
@@ -128,11 +130,9 @@ public class EntryPoint
 
 		// The best-response policy.
 		lSimulator.reset();
-		lHarnass.planBestresponse(10, 25);
+		lHarnass.planBestresponse(10, 25);	//For 10 iterations and 25 simulations?
 		double lBestRespEval = lEvaluator.evaluate(lHarnass, lPenalty, lTemprture, "bestresponse");
 
-		//here our arbiter
-		
 		lPenalty.close();
 		lTemprture.close();
 
