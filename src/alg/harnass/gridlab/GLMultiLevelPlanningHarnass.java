@@ -123,11 +123,17 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 	/**
 	 * Computes the desierd power of a range of houses 
 	 */
-	private int computeGroupDesiredPower(int pStartIndex, int pEndIndex) {
+	private int computeGroupDesiredPower(int pStartIndex, int pEndIndex, Map<AdvancedGridLabAgent, List<ActionReward>> pPreferences) {
+		
+		int power = 0;
 		for (int i = pStartIndex; i <= pEndIndex; i++) {
-			return 1;
+			AdvancedGridLabAgent agent = this.fInstance.getAgentList().get(i);
+			
+			//TODO: 0 is heel slordig, moet een check zijn of dit een 'on' action is
+			if(pPreferences.get(agent).get(0).getAction().getID() == 0);
+				power++;
 		}
-		return 0;
+		return power;
 	}
 	
 	/**
@@ -155,14 +161,14 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 		List<Integer> lChosenAction = Collections.nCopies(pWorld.getSize(), 0);
 
 		int lTotalPower = fInstance.getOnLimits().get(pTime);
-
+		
 		int lStartIndex = 0;
 		double[] lGroupPenalty = new double[fHouseGroups.length];
 		int[] lGroupDesiredPower = new int[fHouseGroups.length];
 		for (int i = 0; i < lGroupPenalty.length; i++) {
 			int lEndIndex = lStartIndex + fHouseGroups[i] - 1;
 			lGroupPenalty[i] = computeGroupPenalty(lStartIndex, lEndIndex);
-			lGroupDesiredPower[i] = computeGroupDesiredPower(lStartIndex, lEndIndex);
+			lGroupDesiredPower[i] = computeGroupDesiredPower(lStartIndex, lEndIndex, lPreferences);
 			lStartIndex += fHouseGroups[i];
 		}
 
