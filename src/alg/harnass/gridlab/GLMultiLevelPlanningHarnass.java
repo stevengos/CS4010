@@ -110,7 +110,7 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 		double lSumPenalty = 0;
 
 		// Add the discomforts experienced for all houses linearly.
-		for (int i = startIndex; i < endIndex; i++)
+		for (int i = startIndex; i <= endIndex; i++)
 		{
 			GridLabHouseModel lModel = this.fSimulator.getHouse(i);
 
@@ -124,7 +124,10 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 	 * Computes the desierd power of a range of houses 
 	 */
 	private int computeGroupDesiredPower(int pStartIndex, int pEndIndex) {
-		return 1;
+		for (int i = pStartIndex; i <= pEndIndex; i++) {
+			return 1;
+		}
+		return 0;
 	}
 	
 	/**
