@@ -57,16 +57,19 @@ public class EntryPoint
 		GLPlanningHarnass lHarnass = null;
 		lHarnass     = new GLPlanningHarnass(lSimulator, lQuality, lSetpoint);
 
+		System.out.println("Running thermostats' policy");
 		// The thermostats' policy.
 		lSimulator.reset();
 		IJointPolicy lPolicy = new GLThermostatPolicy(lSetpoint, lLimitkW);
 		double lThermEval = lEvaluator.evaluate(lPolicy, lPenalty, lTemprture, "reactive");
 
+		System.out.println("Running planned policy");
 		// The planned policy.
 		lSimulator.reset();
 		lHarnass.planAll();
 		double lPlannedEval = lEvaluator.evaluate(lHarnass, lPenalty, lTemprture, "planned");
 
+		System.out.println("Running best-response policy");
 		// The best-response policy.
 		lSimulator.reset();
 		lHarnass.planBestresponse(10, 25);
