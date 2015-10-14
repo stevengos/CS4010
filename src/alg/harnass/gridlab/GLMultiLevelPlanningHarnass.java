@@ -154,10 +154,8 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 		// Initially, all agents get their first choice (i.e., option zero).
 		List<Integer> lChosenAction = Collections.nCopies(pWorld.getSize(), 0);
 
-		//
-		//TODO: OUR ARBITER
-		fInstance.getAgentList().get(1).getModel().getAirTemp();
 		int lTotalPower = fInstance.getOnLimits().get(pTime);
+
 		int lStartIndex = 0;
 		double[] lGroupPenalty = new double[fHouseGroups.length];
 		int[] lGroupDesiredPower = new int[fHouseGroups.length];
@@ -167,6 +165,7 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 			lGroupDesiredPower[i] = computeGroupDesiredPower(lStartIndex, lEndIndex);
 			lStartIndex += fHouseGroups[i];
 		}
+
 		int[] lGroupLimit = SuperArbiter.arbitrage(lTotalPower, lGroupPenalty, lGroupDesiredPower);
 
 		//Divide power among neighbourhoods
