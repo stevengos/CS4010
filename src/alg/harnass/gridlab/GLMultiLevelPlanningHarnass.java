@@ -14,6 +14,7 @@ import alg.sim.solver.EfficientPolicyReader;
 import alg.sim.solver.data.ActionReward;
 import alg.sim.world.gridlab.IGridLabControllable;
 import alg.sim.world.gridlab.IGridLabWorld;
+import alg.sim.world.gridlab.house.GridLabHouseModel;
 /**
  * 
  * @author Christian
@@ -22,10 +23,12 @@ import alg.sim.world.gridlab.IGridLabWorld;
 public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 	
 	private int[]    fHouseGroups;
+	private int		 fSetpoint;
 	
 	public GLMultiLevelPlanningHarnass(int[] pHouseGroups, IGridLabWorld pSimulator, PlanQuality pQuality, int pSetpoint) {
 		super(pSimulator, pQuality, pSetpoint);
 		fHouseGroups = pHouseGroups;
+		this.fSetpoint    = pSetpoint;
 	}
 	
 	/**
@@ -75,6 +78,56 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 	}
 	
 	/**
+	 *	Computes the penalty associated with the discomfort of the houses' occupants. Penalty is
+	 *	defined as the square of the difference between desired and actual, with a small grace-range which
+	 *	is identical to the range used by a default thermostat.
+	 *
+	 *	@param pModel The house model to compute the penalty for.
+	 *	@return House discomfort penalty for the current time-step.
+	 */
+	private double computeHousePenalty(GridLabHouseModel pModel)
+	{
+		double lPenalty = 0;
+
+		double lActualTemp  = pModel.getAirTemp();
+		double lDesiredTemp = this.fSetpoint;
+		double lDifference  = Math.abs(lActualTemp - lDesiredTemp) - 1;
+
+		// In case we are outside our set-point, square the difference as penalty for discomfort.
+		if (lDifference > 0) lPenalty = lDifference * lDifference;
+
+		return lPenalty;
+	}
+
+	/**
+	 *	Computes the penalty associated with the discomfort of the neighborhoods' occupants. Linear
+	 *	sum of the individual houses' discomforts.
+	 *
+	 *	@return Global discomfort penalty for the current time-step.
+	 */
+	private double computeGroupPenalty(int startIndex, int endIndex)
+	{
+		double lSumPenalty = 0;
+
+		// Add the discomforts experienced for all houses linearly.
+		for (int i = startIndex; i < endIndex; i++)
+		{
+			GridLabHouseModel lModel = this.fSimulator.getHouse(i);
+
+			lSumPenalty = lSumPenalty + this.computeHousePenalty(lModel);
+		}
+
+		return lSumPenalty;
+	}
+	
+	/**
+	 * Computes the desierd power of a range of houses 
+	 */
+	private int computeGroupDesiredPower(int pStartIndex, int pEndIndex) {
+		return 1;
+	}
+	
+	/**
 	 * Applies the current policy to the provided pWorld, given that we believe the world to be in time-step pTime. If
 	 * there occurs an overconsumption of energy from applying the policy, arbitrage ensures the conflict is resolved.
 	 * By setting pLearn, we allow the agents to discover which time-steps they are (un)likely to receive energy.
@@ -101,15 +154,21 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 		//
 		//TODO: OUR ARBITER
 		fInstance.getAgentList().get(1).getModel().getAirTemp();
-		int lTotalLimit = fInstance.getOnLimits().get(pTime);
-		int[] lGroupLimit = new int[fHouseGroups.length];
-		for(int i = 0; i < lGroupLimit.length; i++) {
-			lGroupLimit[i] = lTotalLimit/lGroupLimit.length+1;
-		}
-		//END OUR ARBITER
-
-		List<Integer> lArbitrateAction = null;
+		int lTotalPower = fInstance.getOnLimits().get(pTime);
 		int lStartIndex = 0;
+		double[] lGroupPenalty = new double[fHouseGroups.length];
+		int[] lGroupDesiredPower = new int[fHouseGroups.length];
+		for (int i = 0; i < lGroupPenalty.length; i++) {
+			int lEndIndex = lStartIndex + fHouseGroups[i] - 1;
+			lGroupPenalty[i] = computeGroupPenalty(lStartIndex, lEndIndex);
+			lGroupDesiredPower[i] = computeGroupDesiredPower(lStartIndex, lEndIndex);
+			lStartIndex += fHouseGroups[i];
+		}
+		int[] lGroupLimit = SuperArbiter.arbitrage(lTotalPower, lGroupPenalty, lGroupDesiredPower);
+
+		//Divide power among neighbourhoods
+		List<Integer> lArbitrateAction = null;
+		lStartIndex = 0;
 		for (int i = 0; i < this.fHouseGroups.length; i++)
 		{
 			int lHousesInGroup = fHouseGroups[i];	//Number of houses in group i
@@ -119,7 +178,6 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 			Map<AdvancedGridLabAgent, List<ActionReward>> lNeighbourhoodPreferences = this.getActionPreference(lStartIndex, lEndIndex, pTime, lGlobalState, lLocalStates);
 			
 			lStartIndex += lHousesInGroup;
-			
 			
 			ArbiterMode lMode = (pLogit ? ArbiterMode.Logit : ArbiterMode.Deterministic);
 			List<Integer> lArbitrateGroupAction = MultiLevelArbiter.arbitrage(this.fInstance, pTime, lGroupLimit[i], lNeighbourhoodPreferences, lChosenAction, lMode);
