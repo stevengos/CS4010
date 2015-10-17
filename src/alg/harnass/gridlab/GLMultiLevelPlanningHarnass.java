@@ -41,7 +41,7 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 	 * @param pLocal
 	 * @return
 	 */
-	protected Map<AdvancedGridLabAgent, List<ActionReward>> getActionPreference(int startIndex, int endIndex, int pTime, WeatherState pGlobal, Map<AdvancedGridLabAgent, ETPState> pLocal)
+	protected Map<AdvancedGridLabAgent, List<ActionReward>> getActionPreference(int startIndex, int endIndex, WeatherState pGlobal, Map<AdvancedGridLabAgent, ETPState> pLocal)
 	{
 		Map<AdvancedGridLabAgent, List<ActionReward>> lPreferences = new HashMap<AdvancedGridLabAgent, List<ActionReward>>();
 		Set<? extends Action>						  lActions     = this.fInstance.getActions();
@@ -130,10 +130,52 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 			AdvancedGridLabAgent agent = this.fInstance.getAgentList().get(i);
 			
 			//TODO: 0 is heel slordig, moet een check zijn of dit een 'on' action is
-			if(pPreferences.get(agent).get(0).getAction().getID() == 0);
+			if(pPreferences.get(agent).get(0).getAction().getID() == 1)
 				power++;
 		}
 		return power;
+	}
+	
+	/**
+	 * 
+	 * @param pTime
+	 * @param pGlobal
+	 * @param pLocal
+	 * @return
+	 */
+	protected Map<AdvancedGridLabAgent, List<ActionReward>> getMDPActionPreference(Map<AdvancedGridLabAgent, ETPState> pLocal)
+	{
+		Map<AdvancedGridLabAgent, List<ActionReward>> lPreferences = new HashMap<AdvancedGridLabAgent, List<ActionReward>>();
+		Set<? extends Action>						  lActions     = this.fInstance.getActions();
+
+		for (int i = 0; i < this.fInstance.getAgentList().size(); i++)
+		{
+			AdvancedGridLabAgent  lAgent  = this.fInstance.getAgentList().get(i);
+			EfficientPolicyReader lPolicy = this.fAgentPolicy.get(lAgent);
+			ETPState              lState  = pLocal.get(lAgent);
+
+			List<ActionReward> lRewards = lPolicy.getActionReward(lState.getID(), lActions);
+			Collections.sort(lRewards);
+
+			/*
+			 *	In case that we are in a boundary state, then any deviating action would be really, really bad for the agent. So
+			 *	the arbiter has to be informed that neglecting this agent is unacceptable.
+			 */
+			if (lState.isBoundaryState())
+			{
+				if (Double.isInfinite(lState.getAirMin()) || Double.isInfinite(lState.getAirMax()))
+					System.err.println("WARNING: Air Reached Boundary!");
+
+				if (Double.isInfinite(lState.getMassMin()) || Double.isInfinite(lState.getMassMax()))
+					System.err.println("WARNING: Mass Reached Boundary!");
+
+				// The second-preferred action (OFF if too cold) is 10-times worse than it was during planning.
+				lRewards.get(1).shapeReward(10);
+			}
+			lPreferences.put(lAgent, lRewards);
+		}
+
+		return lPreferences;
 	}
 	
 	/**
@@ -183,7 +225,8 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 			
 			int lEndIndex = lStartIndex + lHousesInGroup - 1;
 			
-			Map<AdvancedGridLabAgent, List<ActionReward>> lNeighbourhoodPreferences = this.getActionPreference(lStartIndex, lEndIndex, pTime, lGlobalState, lLocalStates);
+			Map<AdvancedGridLabAgent, List<ActionReward>> lNeighbourhoodPreferences = this.getActionPreference(lStartIndex, lEndIndex, lGlobalState, lLocalStates);
+			//List<Integer> lNeighbourhoodChosenActions = this.getChosenActions(lStartIndex, lEndIndex, lChosenAction);
 			
 			lStartIndex += lHousesInGroup;
 			
@@ -195,13 +238,27 @@ public class GLMultiLevelPlanningHarnass extends GLPlanningHarnass {
 				lArbitrateAction.addAll(lArbitrateGroupAction);
 		}
 		
+		System.out.println("=====");
+		String s = "SuperArbiter => Available Power: " + lTotalPower;
+		System.out.println(s);
+		for(int i = 0; i < lGroupDesiredPower.length; i++) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("N");
+			builder.append(i);
+			builder.append("| Desired: ");
+			builder.append(lGroupDesiredPower[i]);
+			builder.append(" Given: ");
+			builder.append(lGroupLimit[i]);
+			System.out.println(builder.toString());
+		}
+		
 		// Apply the assigned actions.
 		super.applySelectedActions(pWorld, lPreferences, lArbitrateAction);
 
 					
 		//Learning is disabled
 		// Learn from the assignments.
-		//if (pLearn) this.learnConstraint(pTime, lGlobalState, lLocalStates, lPreferences, lChosenAction, lArbitrateAction);
+		if (pLearn) this.learnConstraint(pTime, lGlobalState, lLocalStates, lPreferences, lChosenAction, lArbitrateAction);
 		
 		// Advance the policy pointer.
 		if ((pTime+1) < this.fInstance.getHorizon()) this.advancePolicies();

@@ -71,8 +71,8 @@ public class GridLabTransitionManager3
 				throw new RuntimeException(e);
 			}
 
-			for (int i = 0; i < lJobs; i++)
-				System.out.print("-");
+			//for (int i = 0; i < lJobs; i++)
+			//	System.out.print("-");
 			System.out.flush();
 		}
 	}

@@ -10,6 +10,8 @@ import alg.sim.domain.ArbiMDP;
 import alg.sim.solver.data.ActionReward;
 /**
  * Extensie van Arbiter.java. Deze is omgebouwd zodat deze werkt met het GLMutliLevelPlanningHarnass
+ * @param pLimit
+ * 	limit of group
  * @author Christian
  *
  */
@@ -29,8 +31,9 @@ public class MultiLevelArbiter extends Arbiter {
 			Action lAction   = lActions.get(i);
 			int    lActionID = lAction.getID();
 
-			lActionLimits[lActionID] = pLimit;
+			lActionLimits[lActionID] = pMDP.getActionLimit(lAction, pTime);
 		}
+		lActionLimits[1] = pLimit;
 
 		boolean lOverUse = false;
 		do
